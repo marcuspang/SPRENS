@@ -3,7 +3,9 @@
   "parserOptions": {
     "project": "tsconfig.json"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "extends": [
     "eslint:recommended",
     "plugin:import/recommended",
@@ -19,13 +21,34 @@
     }
   },
   "rules": {
-    "semi": ["error", "always"],
-    "curly": ["warn", "multi"],
-    "quotes": ["error", "single", { "avoidEscape": true }],
-    "jsx-quotes": ["error", "prefer-single"],
-    "linebreak-style": ["error", "unix"],
+    "semi": [
+      "error",
+      "always"
+    ],
+    "curly": [
+      "warn",
+      "multi"
+    ],
+    "quotes": [
+      "error",
+      "single",
+      {
+        "avoidEscape": true
+      }
+    ],
+    "jsx-quotes": [
+      "error",
+      "prefer-single"
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
     "no-console": "warn",
-    "comma-dangle": ["error", "never"],
+    "comma-dangle": [
+      "error",
+      "never"
+    ],
     "no-unused-expressions": "error",
     "no-constant-binary-expression": "error",
     "import/order": [
@@ -36,7 +59,9 @@
             "pattern": "*.scss",
             "group": "builtin",
             "position": "before",
-            "patternOptions": { "matchBase": true }
+            "patternOptions": {
+              "matchBase": true
+            }
           },
           {
             "pattern": "@lib/**",
@@ -50,7 +75,9 @@
           }
         ],
         "warnOnUnassignedImports": true,
-        "pathGroupsExcludedImportTypes": ["type"],
+        "pathGroupsExcludedImportTypes": [
+          "type"
+        ],
         "groups": [
           "builtin",
           "external",
@@ -66,7 +93,9 @@
     "@typescript-eslint/no-misused-promises": [
       "error",
       {
-        "checksVoidReturn": { "attributes": false }
+        "checksVoidReturn": {
+          "attributes": false
+        }
       }
     ],
     "@typescript-eslint/consistent-type-imports": "warn",

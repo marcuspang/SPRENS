@@ -1,7 +1,6 @@
-import { AuthLayout } from '@components/layout/auth-layout';
 import { SEO } from '@components/common/seo';
+import { AuthLayout } from '@components/layout/auth-layout';
 import { LoginMain } from '@components/login/login-main';
-import { LoginFooter } from '@components/login/login-footer';
 import type { ReactElement, ReactNode } from 'react';
 
 export default function Login(): JSX.Element {
@@ -12,7 +11,6 @@ export default function Login(): JSX.Element {
         description='From breaking news and entertainment to sports and politics, get the full story with all the live commentary.'
       />
       <LoginMain />
-      <LoginFooter />
     </div>
   );
 }

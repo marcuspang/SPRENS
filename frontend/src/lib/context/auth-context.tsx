@@ -1,30 +1,35 @@
-import { useState, useEffect, useContext, createContext, useMemo } from 'react';
+import { auth } from '@lib/firebase/app';
 import {
-  signInWithPopup,
+  userBookmarksCollection,
+  userStatsCollection,
+  usersCollection
+} from '@lib/firebase/collections';
+import { getRandomId, getRandomInt } from '@lib/random';
+import type { Bookmark } from '@lib/types/bookmark';
+import type { Stats } from '@lib/types/stats';
+import type { User } from '@lib/types/user';
+import { walletClientToEthers5Signer } from '@lib/web3/config';
+import { SSX } from '@spruceid/ssx';
+import { disconnect, getWalletClient } from '@wagmi/core';
+import { useWeb3Modal } from '@web3modal/react';
+import type { User as AuthUser } from 'firebase/auth';
+import {
   GoogleAuthProvider,
   onAuthStateChanged,
+  signInWithPopup,
   signOut as signOutFirebase
 } from 'firebase/auth';
+import type { WithFieldValue } from 'firebase/firestore';
 import {
   doc,
   getDoc,
-  setDoc,
   onSnapshot,
-  serverTimestamp
+  serverTimestamp,
+  setDoc
 } from 'firebase/firestore';
-import { auth } from '@lib/firebase/app';
-import {
-  usersCollection,
-  userStatsCollection,
-  userBookmarksCollection
-} from '@lib/firebase/collections';
-import { getRandomId, getRandomInt } from '@lib/random';
 import type { ReactNode } from 'react';
-import type { User as AuthUser } from 'firebase/auth';
-import type { WithFieldValue } from 'firebase/firestore';
-import type { User } from '@lib/types/user';
-import type { Bookmark } from '@lib/types/bookmark';
-import type { Stats } from '@lib/types/stats';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useAccount, useWalletClient } from 'wagmi';
 
 type AuthContext = {
   user: User | null;
@@ -35,6 +40,19 @@ type AuthContext = {
   userBookmarks: Bookmark[] | null;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  // web3
+  ssxProvider: SSX | null;
+  showSyncModal: boolean;
+  showSuccessModal: boolean;
+  showKeplerModal: boolean;
+  showSignInModal: boolean;
+  syncOrbit: () => void;
+  createDataVault: () => void;
+  closeSyncModal: () => void;
+  closeSuccessModal: () => void;
+  closeKeplerModal: () => void;
+  closeSignInModal: () => void;
+  handleSignIn: () => void;
 };
 
 export const AuthContext = createContext<AuthContext | null>(null);
@@ -50,6 +68,109 @@ export function AuthContextProvider({
   const [userBookmarks, setUserBookmarks] = useState<Bookmark[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [ssxProvider, setSSX] = useState<SSX | null>(null);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showKeplerModal, setShowKeplerModal] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+
+  const { isConnected } = useAccount();
+  const { open: openWeb3Modal, isOpen } = useWeb3Modal();
+  const { data: walletClient } = useWalletClient();
+
+  useEffect(() => {
+    disconnect();
+  }, []);
+
+  const initSSX = async () => {
+    const chainId = await walletClient?.getChainId();
+    const newWalletClient = await getWalletClient({ chainId });
+    const signer =
+      newWalletClient !== null
+        ? walletClientToEthers5Signer(newWalletClient)
+        : null;
+    if (signer) {
+      let ssxConfig = {
+        providers: {
+          web3: {
+            driver: signer.provider
+          }
+        },
+        modules: {
+          storage: {
+            prefix: 'sprens',
+            hosts: ['https://kepler.spruceid.xyz'],
+            autoCreateNewOrbit: false
+          }
+        },
+        enableDaoLogin: true
+      };
+
+      const ssx = new SSX(ssxConfig);
+      setSSX(ssx);
+      try {
+        await ssx.signIn();
+        const hasOrbit = await ssx.storage.activateSession();
+        setShowSignInModal(false);
+        setShowKeplerModal(!hasOrbit);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setShowSignInModal(false);
+      setSSX(null);
+    }
+  };
+
+  const syncOrbit = () => {
+    closeSyncModal();
+    // likes?.records?.map((like: any) => store('like/' + like.cid, like));
+    // posts?.feed?.map((post: any) => store('post/' + post.post.cid, post));
+    setShowSuccessModal(true);
+  };
+
+  const createDataVault = async () => {
+    await ssxProvider?.storage.hostOrbit();
+    setShowKeplerModal(false);
+    setShowSyncModal(true);
+  };
+
+  //   const store = async (key: any, value: any) => {
+  //     await ssxProvider?.storage.put(key, value);
+  //   };
+
+  useEffect(() => {
+    if (isConnected) initSSX();
+  }, [walletClient]);
+
+  const ssxHandler = async () => {
+    await openWeb3Modal();
+  };
+
+  const closeSyncModal = () => {
+    disconnect();
+    setShowSyncModal(false);
+  };
+
+  const closeSuccessModal = () => {
+    disconnect();
+    setShowSuccessModal(false);
+  };
+
+  const closeKeplerModal = () => {
+    disconnect();
+    setShowKeplerModal(false);
+  };
+
+  const closeSignInModal = () => {
+    disconnect();
+    setShowSignInModal(false);
+  };
+
+  const handleSignIn = async () => {
+    await ssxHandler();
+  };
 
   useEffect(() => {
     const manageUser = async (authUser: AuthUser): Promise<void> => {
@@ -185,7 +306,19 @@ export function AuthContextProvider({
     randomSeed,
     userBookmarks,
     signOut,
-    signInWithGoogle
+    signInWithGoogle,
+    ssxProvider,
+    showSyncModal,
+    showSuccessModal,
+    showKeplerModal,
+    showSignInModal,
+    syncOrbit,
+    createDataVault,
+    closeSyncModal,
+    closeSuccessModal,
+    closeKeplerModal,
+    closeSignInModal,
+    handleSignIn
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
