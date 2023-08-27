@@ -15,3 +15,7 @@ Instead of relying on [Hubs](https://docs.farcaster.xyz/protocol/hubs.html), use
 - Create [Token-bound Account](https://tokenbound.org/) using ENS NFT, and derive identity based off of the ERC6551 Account
   - Store all decentralized protocol NFTs (incl. cross-chain) and change identity whenever (think switching accounts in wallet provider)
 - Build public API for a Token-bound Account's on-chain social activity
+
+## Acknowledgements
+
+- Starter project cloned from https://github.dev/spruceid/teal
