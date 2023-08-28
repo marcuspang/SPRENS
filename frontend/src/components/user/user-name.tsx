@@ -31,6 +31,7 @@ export function UserName({
         )}
         tabIndex={username ? 0 : -1}
       >
+        {/* @ts-ignore */}
         <CustomTag className='truncate'>{name}</CustomTag>
         {verified && (
           <i>

@@ -6,6 +6,7 @@ import { UserFollowing } from './user-following';
 import { UserFollowStats } from './user-follow-stats';
 import type { IconName } from '@components/ui/hero-icon';
 import type { User } from '@lib/types/user';
+import { Timestamp } from 'firebase/firestore';
 
 type UserDetailsProps = Pick<
   User,
@@ -38,7 +39,7 @@ export function UserDetails({
   const detailIcons: Readonly<DetailIcon[]> = [
     [location, 'MapPinIcon'],
     [website, 'LinkIcon'],
-    [`Joined ${formatDate(createdAt, 'joined')}`, 'CalendarDaysIcon']
+    [`Joined ${formatDate(Timestamp.now(), 'joined')}`, 'CalendarDaysIcon']
   ];
 
   return (
@@ -79,7 +80,7 @@ export function UserDetails({
                       {detail}
                       <ToolTip
                         className='translate-y-1'
-                        tip={formatDate(createdAt, 'full')}
+                        tip={formatDate(Timestamp.now(), 'full')}
                       />
                     </button>
                   ) : (
