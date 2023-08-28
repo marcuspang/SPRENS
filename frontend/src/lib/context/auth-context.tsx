@@ -27,6 +27,7 @@ import {
   serverTimestamp,
   setDoc
 } from 'firebase/firestore';
+import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useAccount, useWalletClient } from 'wagmi';
@@ -48,11 +49,8 @@ type AuthContext = {
   showSignInModal: boolean;
   syncOrbit: () => void;
   createDataVault: () => void;
-  closeSyncModal: () => void;
-  closeSuccessModal: () => void;
-  closeKeplerModal: () => void;
-  closeSignInModal: () => void;
   handleSignIn: () => void;
+  hasOrbit: boolean;
 };
 
 export const AuthContext = createContext<AuthContext | null>(null);
@@ -72,7 +70,7 @@ export function AuthContextProvider({
   const [ssxProvider, setSSX] = useState<SSX | null>(null);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showKeplerModal, setShowKeplerModal] = useState(false);
+  const [hasOrbit, setHasOrbit] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
 
   const { isConnected } = useAccount();
@@ -98,11 +96,7 @@ export function AuthContextProvider({
           }
         },
         modules: {
-          storage: {
-            prefix: 'sprens',
-            hosts: ['https://kepler.spruceid.xyz'],
-            autoCreateNewOrbit: false
-          }
+          storage: true
         },
         enableDaoLogin: true
       };
@@ -111,34 +105,32 @@ export function AuthContextProvider({
       setSSX(ssx);
       try {
         await ssx.signIn();
-        const hasOrbit = await ssx.storage.activateSession();
-        setShowSignInModal(false);
-        setShowKeplerModal(!hasOrbit);
+        const userHasOrbit = await ssx.storage.activateSession();
+        setHasOrbit(!userHasOrbit);
       } catch (err) {
         console.error(err);
       }
     } else {
-      setShowSignInModal(false);
       setSSX(null);
     }
   };
 
   const syncOrbit = () => {
-    closeSyncModal();
     // likes?.records?.map((like: any) => store('like/' + like.cid, like));
     // posts?.feed?.map((post: any) => store('post/' + post.post.cid, post));
-    setShowSuccessModal(true);
   };
 
   const createDataVault = async () => {
     await ssxProvider?.storage.hostOrbit();
-    setShowKeplerModal(false);
-    setShowSyncModal(true);
+    const userHasOrbit = await ssxProvider?.storage.activateSession();
+    if (userHasOrbit !== undefined) {
+      setHasOrbit(userHasOrbit);
+    }
   };
 
-  //   const store = async (key: any, value: any) => {
-  //     await ssxProvider?.storage.put(key, value);
-  //   };
+  const store = async (key: any, value: any) => {
+    await ssxProvider?.storage.put(key, value);
+  };
 
   useEffect(() => {
     if (isConnected) initSSX();
@@ -146,26 +138,6 @@ export function AuthContextProvider({
 
   const ssxHandler = async () => {
     await openWeb3Modal();
-  };
-
-  const closeSyncModal = () => {
-    disconnect();
-    setShowSyncModal(false);
-  };
-
-  const closeSuccessModal = () => {
-    disconnect();
-    setShowSuccessModal(false);
-  };
-
-  const closeKeplerModal = () => {
-    disconnect();
-    setShowKeplerModal(false);
-  };
-
-  const closeSignInModal = () => {
-    disconnect();
-    setShowSignInModal(false);
   };
 
   const handleSignIn = async () => {
@@ -310,15 +282,12 @@ export function AuthContextProvider({
     ssxProvider,
     showSyncModal,
     showSuccessModal,
-    showKeplerModal,
+    showKeplerModal: hasOrbit,
     showSignInModal,
     syncOrbit,
     createDataVault,
-    closeSyncModal,
-    closeSuccessModal,
-    closeKeplerModal,
-    closeSignInModal,
-    handleSignIn
+    handleSignIn,
+    hasOrbit
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

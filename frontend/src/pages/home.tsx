@@ -19,7 +19,6 @@ import { useAuth } from '@lib/context/auth-context';
 export default function Home(): JSX.Element {
   const { isMobile } = useWindow();
   const { ssxProvider } = useAuth();
-  console.log({ ssxProvider });
   const { data, loading, LoadMore } = useInfiniteScroll(
     tweetsCollection,
     [where('parent', '==', null), orderBy('createdAt', 'desc')],
