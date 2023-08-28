@@ -31,6 +31,7 @@ export function UserName({
         )}
         tabIndex={username ? 0 : -1}
       >
+        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
         {/* @ts-ignore */}
         <CustomTag className='truncate'>{name}</CustomTag>
         {verified && (
