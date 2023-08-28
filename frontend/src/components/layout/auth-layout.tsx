@@ -27,7 +27,7 @@ export function AuthLayout({ children }: LayoutProps): JSX.Element {
     void checkLogin();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading]);
-
+console.log({loading, pending})
   if (loading || pending) return <Placeholder />;
 
   return <>{children}</>;

@@ -1,33 +1,16 @@
 import { auth } from '@lib/firebase/app';
-import {
-  userBookmarksCollection,
-  userStatsCollection,
-  usersCollection
-} from '@lib/firebase/collections';
 import { getRandomId, getRandomInt } from '@lib/random';
 import type { Bookmark } from '@lib/types/bookmark';
-import type { Stats } from '@lib/types/stats';
 import type { User } from '@lib/types/user';
 import { walletClientToEthers5Signer } from '@lib/web3/config';
-import { SSX } from '@spruceid/ssx';
+import { SSX, SSXEnsData } from '@spruceid/ssx';
 import { disconnect, getWalletClient } from '@wagmi/core';
 import { useWeb3Modal } from '@web3modal/react';
-import type { User as AuthUser } from 'firebase/auth';
 import {
   GoogleAuthProvider,
-  onAuthStateChanged,
   signInWithPopup,
   signOut as signOutFirebase
 } from 'firebase/auth';
-import type { WithFieldValue } from 'firebase/firestore';
-import {
-  doc,
-  getDoc,
-  onSnapshot,
-  serverTimestamp,
-  setDoc
-} from 'firebase/firestore';
-import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useAccount, useWalletClient } from 'wagmi';
@@ -45,9 +28,11 @@ type AuthContext = {
   ssxProvider: SSX | null;
   showSyncModal: boolean;
   showSuccessModal: boolean;
-  showKeplerModal: boolean;
+  ens: SSXEnsData | undefined;
   showSignInModal: boolean;
-  syncOrbit: () => void;
+  store: (key: any, value: any) => void;
+  get: (key: string) => Promise<any>;
+  syncOrbit: ({ likes, posts, user }: any) => void;
   createDataVault: () => void;
   handleSignIn: () => void;
   hasOrbit: boolean;
@@ -65,7 +50,7 @@ export function AuthContextProvider({
   const [user, setUser] = useState<User | null>(null);
   const [userBookmarks, setUserBookmarks] = useState<Bookmark[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [ssxProvider, setSSX] = useState<SSX | null>(null);
   const [showSyncModal, setShowSyncModal] = useState(false);
@@ -73,7 +58,9 @@ export function AuthContextProvider({
   const [hasOrbit, setHasOrbit] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
 
-  const { isConnected } = useAccount();
+  const [ens, setEns] = useState<SSXEnsData>();
+
+  const { isConnected, address } = useAccount();
   const { open: openWeb3Modal, isOpen } = useWeb3Modal();
   const { data: walletClient } = useWalletClient();
 
@@ -89,7 +76,8 @@ export function AuthContextProvider({
         ? walletClientToEthers5Signer(newWalletClient)
         : null;
     if (signer) {
-      let ssxConfig = {
+      const ssx = new SSX({
+        resolveEns: true,
         providers: {
           web3: {
             driver: signer.provider
@@ -97,16 +85,19 @@ export function AuthContextProvider({
         },
         modules: {
           storage: true
-        },
-        enableDaoLogin: true
-      };
-
-      const ssx = new SSX(ssxConfig);
+        }
+      });
       setSSX(ssx);
       try {
-        await ssx.signIn();
-        const userHasOrbit = await ssx.storage.activateSession();
-        setHasOrbit(!userHasOrbit);
+        const { ens } = await ssx.signIn();
+        if (ens !== undefined) {
+          setEns(ens);
+
+          const userHasOrbit = await ssx.storage.activateSession();
+          setHasOrbit(userHasOrbit);
+        } else {
+          disconnect();
+        }
       } catch (err) {
         console.error(err);
       }
@@ -115,9 +106,12 @@ export function AuthContextProvider({
     }
   };
 
-  const syncOrbit = () => {
-    // likes?.records?.map((like: any) => store('like/' + like.cid, like));
-    // posts?.feed?.map((post: any) => store('post/' + post.post.cid, post));
+  const syncOrbit = ({ likes, posts, user }: any) => {
+    if (address) {
+      store('user/' + address, user);
+    }
+    likes?.map((like: any) => store('like/' + like.id, like));
+    posts?.map((post: any) => store('post/' + post.post.id, post));
   };
 
   const createDataVault = async () => {
@@ -130,6 +124,15 @@ export function AuthContextProvider({
 
   const store = async (key: any, value: any) => {
     await ssxProvider?.storage.put(key, value);
+  };
+
+  const get = async (key: string) => {
+    const response = await ssxProvider?.storage.get(key);
+    console.log({ response });
+    if (response?.ok && response?.data.ok) {
+      return response.data.data;
+    }
+    return null;
   };
 
   useEffect(() => {
@@ -145,110 +148,42 @@ export function AuthContextProvider({
   };
 
   useEffect(() => {
-    const manageUser = async (authUser: AuthUser): Promise<void> => {
-      const { uid, displayName, photoURL } = authUser;
-
-      const userSnapshot = await getDoc(doc(usersCollection, uid));
-
-      if (!userSnapshot.exists()) {
-        let available = false;
-        let randomUsername = '';
-
-        while (!available) {
-          const normalizeName = displayName?.replace(/\s/g, '').toLowerCase();
+    (async () => {
+      if (ssxProvider && isConnected && hasOrbit && address && user === null) {
+        const response = await ssxProvider?.storage.get('user/' + address);
+        if (!response.ok || !response.data.ok) {
+          const normalizeName = address?.replace(/\s/g, '').toLowerCase();
           const randomInt = getRandomInt(1, 10_000);
 
-          randomUsername = `${normalizeName as string}${randomInt}`;
-
-          const randomUserSnapshot = await getDoc(
-            doc(usersCollection, randomUsername)
-          );
-
-          if (!randomUserSnapshot.exists()) available = true;
+          const newUser: User = {
+            id: address,
+            bio: null,
+            name: address,
+            theme: null,
+            accent: null,
+            website: null,
+            location: null,
+            photoURL: ens?.avatarUrl || '',
+            username: ens?.domain || `${normalizeName}${randomInt}`,
+            verified: false,
+            following: [],
+            followers: [],
+            createdAt: new Date().getTime(),
+            updatedAt: null,
+            totalTweets: 0,
+            totalPhotos: 0,
+            pinnedTweet: null,
+            coverPhotoURL: null
+          };
+          setUser(newUser);
+          syncOrbit({ user: newUser });
+        } else {
+          setUser(response.data.data);
+          syncOrbit({ user: response.data.data });
         }
-
-        const userData: WithFieldValue<User> = {
-          id: uid,
-          bio: null,
-          name: displayName as string,
-          theme: null,
-          accent: null,
-          website: null,
-          location: null,
-          photoURL: photoURL as string,
-          username: randomUsername,
-          verified: false,
-          following: [],
-          followers: [],
-          createdAt: serverTimestamp(),
-          updatedAt: null,
-          totalTweets: 0,
-          totalPhotos: 0,
-          pinnedTweet: null,
-          coverPhotoURL: null
-        };
-
-        const userStatsData: WithFieldValue<Stats> = {
-          likes: [],
-          tweets: [],
-          updatedAt: null
-        };
-
-        try {
-          await Promise.all([
-            setDoc(doc(usersCollection, uid), userData),
-            setDoc(doc(userStatsCollection(uid), 'stats'), userStatsData)
-          ]);
-
-          const newUser = (await getDoc(doc(usersCollection, uid))).data();
-          setUser(newUser as User);
-        } catch (error) {
-          setError(error as Error);
-        }
-      } else {
-        const userData = userSnapshot.data();
-        setUser(userData);
       }
-
-      setLoading(false);
-    };
-
-    const handleUserAuth = (authUser: AuthUser | null): void => {
-      setLoading(true);
-
-      if (authUser) void manageUser(authUser);
-      else {
-        setUser(null);
-        setLoading(false);
-      }
-    };
-
-    onAuthStateChanged(auth, handleUserAuth);
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const { id } = user;
-
-    const unsubscribeUser = onSnapshot(doc(usersCollection, id), (doc) => {
-      setUser(doc.data() as User);
-    });
-
-    const unsubscribeBookmarks = onSnapshot(
-      userBookmarksCollection(id),
-      (snapshot) => {
-        const bookmarks = snapshot.docs.map((doc) => doc.data());
-        setUserBookmarks(bookmarks);
-      }
-    );
-
-    return () => {
-      unsubscribeUser();
-      unsubscribeBookmarks();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+    })();
+  }, [ssxProvider, isConnected, hasOrbit, address]);
 
   const signInWithGoogle = async (): Promise<void> => {
     try {
@@ -282,8 +217,10 @@ export function AuthContextProvider({
     ssxProvider,
     showSyncModal,
     showSuccessModal,
-    showKeplerModal: hasOrbit,
     showSignInModal,
+    ens,
+    store,
+    get,
     syncOrbit,
     createDataVault,
     handleSignIn,

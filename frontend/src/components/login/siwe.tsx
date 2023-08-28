@@ -1,4 +1,3 @@
-import { Modal } from '@components/modal/modal';
 import { Button } from '@components/ui/button';
 import { useAuth } from '@lib/context/auth-context';
 import { useRouter } from 'next/router';
@@ -6,16 +5,16 @@ import { useEffect } from 'react';
 import { useAccount } from 'wagmi';
 
 const SIWE = () => {
-  const { handleSignIn, ssxProvider, createDataVault, syncOrbit, hasOrbit } =
+  const { handleSignIn, createDataVault, hasOrbit, ens, ssxProvider } =
     useAuth();
   const { isConnected } = useAccount();
   const router = useRouter();
 
-  // useEffect(() => {
-  //   if (ssxProvider && isConnected && hasOrbit) {
-  //     router.push('/home');
-  //   }
-  // }, [ssxProvider, isConnected, hasOrbit]);
+  useEffect(() => {
+    if (ssxProvider && isConnected && hasOrbit) {
+      router.push('/home');
+    }
+  }, [ssxProvider, isConnected, hasOrbit]);
 
   if (!isConnected) {
     return (
@@ -50,6 +49,22 @@ const SIWE = () => {
             Privacy Policy
           </a>
           .
+        </p>
+      </>
+    );
+  }
+
+  if (ens === undefined) {
+    return (
+      <>
+        <h2 className='text-center'>
+          To use SPRENS, you need to have an ENS account
+        </h2>
+        <p
+          className='inner:custom-underline inner:custom-underline text-center text-xs
+                   text-light-secondary inner:text-accent-blue dark:text-dark-secondary'
+        >
+          Please login to an Ethereum account with an ENS name.
         </p>
       </>
     );

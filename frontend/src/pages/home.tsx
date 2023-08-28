@@ -18,12 +18,16 @@ import { useAuth } from '@lib/context/auth-context';
 
 export default function Home(): JSX.Element {
   const { isMobile } = useWindow();
-  const { ssxProvider } = useAuth();
-  const { data, loading, LoadMore } = useInfiniteScroll(
-    tweetsCollection,
-    [where('parent', '==', null), orderBy('createdAt', 'desc')],
-    { includeUser: true, allowNull: true, preserve: true }
-  );
+  const { data, loading, LoadMore } = {
+    data: [],
+    loading: false,
+    LoadMore: () => null
+  };
+  // = useInfiniteScroll(
+  //   tweetsCollection,
+  //   [where('parent', '==', null), orderBy('createdAt', 'desc')],
+  //   { includeUser: true, allowNull: true, preserve: true }
+  // );
 
   return (
     <MainContainer>

@@ -13,12 +13,14 @@ import { UserName } from '@components/user/user-name';
 import { UserUsername } from '@components/user/user-username';
 import { variants } from './more-settings';
 import type { User } from '@lib/types/user';
+import { useAccount } from 'wagmi';
 
 export function SidebarProfile(): JSX.Element {
-  const { user, signOut } = useAuth();
+  const { user, user: user2, signOut, get } = useAuth();
+  const { address } = useAccount();
   const { open, openModal, closeModal } = useModal();
 
-  const { name, username, verified, photoURL } = user as User;
+  const { name = 'Your Name', username, verified, photoURL } = user2 as User;
 
   return (
     <>
@@ -42,7 +44,7 @@ export function SidebarProfile(): JSX.Element {
           <>
             <Menu.Button
               className={cn(
-                `custom-button main-tab dark-bg-tab flex w-full items-center 
+                `custom-button main-tab dark-bg-tab flex w-full items-center
                  justify-between hover:bg-light-primary/10 active:bg-light-primary/20
                  dark:hover:bg-dark-primary/10 dark:active:bg-dark-primary/20`,
                 open && 'bg-light-primary/10 dark:bg-dark-primary/10'
@@ -51,7 +53,11 @@ export function SidebarProfile(): JSX.Element {
               <div className='flex gap-3 truncate'>
                 <UserAvatar src={photoURL} alt={name} size={40} />
                 <div className='hidden truncate text-start leading-5 xl:block'>
-                  <UserName name={name} className='start' verified={verified} />
+                  <UserName
+                    name={name}
+                    className='start'
+                    verified={verified}
+                  />
                   <UserUsername username={username} disableLink />
                 </div>
               </div>
@@ -63,13 +69,13 @@ export function SidebarProfile(): JSX.Element {
             <AnimatePresence>
               {open && (
                 <Menu.Items
-                  className='menu-container absolute left-0 right-0 -top-36 w-60 xl:w-full'
+                  className='menu-container absolute -top-36 left-0 right-0 w-60 xl:w-full'
                   as={motion.div}
                   {...variants}
                   static
                 >
                   <Menu.Item
-                    className='flex items-center justify-between gap-4 border-b 
+                    className='flex items-center justify-between gap-4 border-b
                                border-light-border px-4 py-3 dark:border-dark-border'
                     as='div'
                     disabled
@@ -104,7 +110,7 @@ export function SidebarProfile(): JSX.Element {
                   </Menu.Item>
                   <i
                     className='absolute -bottom-[10px] left-2 translate-x-1/2 rotate-180
-                               [filter:drop-shadow(#cfd9de_1px_-1px_1px)] 
+                               [filter:drop-shadow(#cfd9de_1px_-1px_1px)]
                                dark:[filter:drop-shadow(#333639_1px_-1px_1px)]
                                xl:left-1/2 xl:-translate-x-1/2'
                   >
