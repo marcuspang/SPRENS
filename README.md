@@ -18,4 +18,5 @@ Instead of relying on [Hubs](https://docs.farcaster.xyz/protocol/hubs.html), use
 
 ## Acknowledgements
 
-- Starter project cloned from https://github.dev/spruceid/teal
+- With help from https://github.dev/spruceid/teal
+- Starter project build with https://github.com/ccrsxx/twitter-clone
