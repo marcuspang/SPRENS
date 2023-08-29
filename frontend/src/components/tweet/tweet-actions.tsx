@@ -161,7 +161,7 @@ export function TweetActions({
             isInAdminControl ? `@${username}'s` : 'your'
           } profile, the timeline of any accounts that follow ${
             isInAdminControl ? `@${username}` : 'you'
-          }, and from Twitter search results.`}
+          }, and from SPRENS search results.`}
           mainBtnClassName='bg-accent-red hover:bg-accent-red/90 active:bg-accent-red/75 accent-tab
                             focus-visible:bg-accent-red/90'
           mainBtnLabel='Delete'
@@ -190,7 +190,7 @@ export function TweetActions({
             <Popover.Button
               as={Button}
               className={cn(
-                `main-tab group group absolute top-2 right-2 p-2 
+                `main-tab group group absolute right-2 top-2 p-2
                  hover:bg-accent-blue/10 focus-visible:bg-accent-blue/10
                  focus-visible:!ring-accent-blue/80 active:bg-accent-blue/20`,
                 open && 'bg-accent-blue/10 [&>div>svg]:text-accent-blue'
@@ -208,7 +208,7 @@ export function TweetActions({
             <AnimatePresence>
               {open && (
                 <Popover.Panel
-                  className='menu-container group absolute top-[50px] right-2 whitespace-nowrap text-light-primary 
+                  className='menu-container group absolute right-2 top-[50px] whitespace-nowrap text-light-primary
                              dark:text-dark-primary'
                   as={motion.div}
                   {...variants}

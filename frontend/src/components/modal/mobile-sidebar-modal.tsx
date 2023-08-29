@@ -36,7 +36,7 @@ const topNavLinks: Readonly<MobileNavLink[]> = [
   },
   {
     href: '/people',
-    linkName: 'Twitter Circle',
+    linkName: 'SPRENS Circle',
     iconName: 'UserGroupIcon'
   }
 ];
@@ -120,7 +120,7 @@ export function MobileSidebarModal({
         <ActionModal
           useIcon
           focusOnMainBtn
-          title='Log out of Twitter?'
+          title='Log out of SPRENS?'
           description='You can always log back in at any time. If you just want to switch accounts, you can do that by adding an existing account.'
           mainBtnLabel='Log out'
           action={signOut}
@@ -151,11 +151,11 @@ export function MobileSidebarModal({
             )}
           </a>
         </Link>
-        <div className='mb-8 ml-2 -mt-4'>
+        <div className='-mt-4 mb-8 ml-2'>
           <UserAvatar
             className='absolute -translate-y-1/2 bg-main-background p-1 hover:brightness-100
-                       [&>figure>span]:[transition:200ms]
-                       [&:hover>figure>span]:brightness-75'
+                       [&:hover>figure>span]:brightness-75
+                       [&>figure>span]:[transition:200ms]'
             username={username}
             src={photoURL}
             alt={name}
@@ -176,7 +176,7 @@ export function MobileSidebarModal({
             {allStats.map(([id, label, stat]) => (
               <Link href={`${userLink}/${id}`} key={id}>
                 <a
-                  className='hover-animation flex h-4 items-center gap-1 border-b border-b-transparent 
+                  className='hover-animation flex h-4 items-center gap-1 border-b border-b-transparent
                              outline-none hover:border-b-light-primary focus-visible:border-b-light-primary
                              dark:hover:border-b-dark-primary dark:focus-visible:border-b-dark-primary'
                 >
@@ -206,7 +206,7 @@ export function MobileSidebarModal({
             ))}
             <Button
               className='accent-tab accent-bg-tab flex items-center gap-2 rounded-md p-1.5 font-bold transition
-                         hover:bg-light-primary/10 focus-visible:ring-2 first:focus-visible:ring-[#878a8c] 
+                         hover:bg-light-primary/10 focus-visible:ring-2 first:focus-visible:ring-[#878a8c]
                          dark:hover:bg-dark-primary/10 dark:focus-visible:ring-white'
               onClick={displayOpenModal}
             >
@@ -215,7 +215,7 @@ export function MobileSidebarModal({
             </Button>
             <Button
               className='accent-tab accent-bg-tab flex items-center gap-2 rounded-md p-1.5 font-bold transition
-                         hover:bg-light-primary/10 focus-visible:ring-2 first:focus-visible:ring-[#878a8c] 
+                         hover:bg-light-primary/10 focus-visible:ring-2 first:focus-visible:ring-[#878a8c]
                          dark:hover:bg-dark-primary/10 dark:focus-visible:ring-white'
               onClick={logOutOpenModal}
             >

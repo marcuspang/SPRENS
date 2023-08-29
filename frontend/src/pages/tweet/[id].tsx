@@ -46,9 +46,9 @@ export default function TweetId(): JSX.Element {
   const parentId = tweetData?.parent?.id;
 
   const pageTitle = tweetData
-    ? `${tweetData.user.name} on Twitter: "${text ?? ''}${
+    ? `${tweetData.user.name} on SPRENS: "${text ?? ''}${
         images ? ` (${imagesLength} image${isPlural(imagesLength)})` : ''
-      }" / Twitter`
+      }" / SPRENS`
     : null;
 
   return (
@@ -63,7 +63,7 @@ export default function TweetId(): JSX.Element {
           <Loading className='mt-5' />
         ) : !tweetData ? (
           <>
-            <SEO title='Tweet not found / Twitter' />
+            <SEO title='Tweet not found / SPRENS' />
             <Error message='Tweet not found' />
           </>
         ) : (

@@ -1,5 +1,6 @@
 import { Button } from '@components/ui/button';
 import { useAuth } from '@lib/context/auth-context';
+import { Web3NetworkSwitch } from '@web3modal/react';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useAccount } from 'wagmi';
@@ -50,6 +51,7 @@ const SIWE = () => {
           </a>
           .
         </p>
+        <Web3NetworkSwitch />
       </>
     );
   }
@@ -66,6 +68,7 @@ const SIWE = () => {
         >
           Please login to an Ethereum account with an ENS name.
         </p>
+        <Web3NetworkSwitch />
       </>
     );
   }
@@ -91,6 +94,7 @@ const SIWE = () => {
           You don't currently have a data vault. Sign the message to create your
           data vault. You can change your data vault at any time afterwards.
         </p>
+        <Web3NetworkSwitch />
       </>
     );
   }

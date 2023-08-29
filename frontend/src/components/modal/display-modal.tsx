@@ -30,20 +30,20 @@ export function DisplayModal({ closeModal }: DisplayModalProps): JSX.Element {
       <div className='flex flex-col gap-3 text-center'>
         <h2 className='text-2xl font-bold'>Customize your view</h2>
         <p className='text-light-secondary dark:text-dark-secondary'>
-          These settings affect all the Twitter accounts on this browser.
+          These settings affect all the SPRENS accounts on this browser.
         </p>
       </div>
       <article
-        className='hover-animation mx-8 rounded-2xl border 
+        className='hover-animation mx-8 rounded-2xl border
                    border-light-border px-4 py-3 dark:border-dark-border'
       >
         <div className='grid grid-cols-[auto,1fr] gap-3'>
-          <UserAvatar src='/assets/twitter-avatar.jpg' alt='Twitter' />
+          <UserAvatar src='/assets/twitter-avatar.jpg' alt='SPRENS' />
           <div>
             <div className='flex gap-1'>
-              <UserName verified name='Twitter' />
+              <UserName verified name='SPRENS' />
               <p className='text-light-secondary dark:text-dark-secondary'>
-                @twitter
+                @SPRENS
               </p>
               <div className='flex gap-1 text-light-secondary dark:text-dark-secondary'>
                 <i>·</i>
@@ -51,7 +51,7 @@ export function DisplayModal({ closeModal }: DisplayModalProps): JSX.Element {
               </div>
             </div>
             <p className='whitespace-pre-line break-words'>
-              At the heart of Twitter are short messages called Tweets — just
+              At the heart of SPRENS are short messages called Tweets — just
               like this one — which can include photos, videos, links, text,
               hashtags, and mentions like{' '}
               <span className='text-main-accent'>@twitter</span>.
@@ -64,7 +64,7 @@ export function DisplayModal({ closeModal }: DisplayModalProps): JSX.Element {
           Color
         </p>
         <div
-          className='hover-animation grid grid-cols-3 grid-rows-2 justify-items-center gap-3 
+          className='hover-animation grid grid-cols-3 grid-rows-2 justify-items-center gap-3
                      rounded-2xl bg-main-sidebar-background py-3 xs:grid-cols-6 xs:grid-rows-none'
         >
           {accentsColor.map((accentColor) => (
