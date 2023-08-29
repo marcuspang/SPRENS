@@ -16,11 +16,11 @@ import type { User } from '@lib/types/user';
 import { useAccount } from 'wagmi';
 
 export function SidebarProfile(): JSX.Element {
-  const { user, user: user2, signOut, get } = useAuth();
+  const { user, signOut, get } = useAuth();
   const { address } = useAccount();
   const { open, openModal, closeModal } = useModal();
 
-  const { name = 'Your Name', username, verified, photoURL } = user2 as User;
+  const { name = 'Your Name', username, verified, photoURL } = user as User;
 
   return (
     <>
@@ -100,7 +100,7 @@ export function SidebarProfile(): JSX.Element {
                         onClick={openModal}
                       >
                         <HeroIcon iconName='ArrowRightOnRectangleIcon' />
-                        Log out @{username}
+                        Log out
                       </Button>
                     )}
                   </Menu.Item>

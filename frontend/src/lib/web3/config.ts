@@ -4,7 +4,7 @@ import {
   w3mProvider
 } from '@web3modal/ethereum';
 import { configureChains, createConfig } from 'wagmi';
-import { polygon, mainnet, goerli, sepolia } from 'wagmi/chains';
+import { polygon, mainnet, avalanche } from 'wagmi/chains';
 import type { WalletClient } from '@wagmi/core';
 import { providers } from 'ethers';
 
@@ -16,7 +16,7 @@ if (!process.env.WALLET_CONNECT_PROJECT_ID) {
 export const projectId = process.env.WALLET_CONNECT_PROJECT_ID ?? '';
 
 // 2. Configure wagmi client
-const chains = [mainnet, goerli, sepolia, polygon];
+const chains = [mainnet, polygon, avalanche];
 
 const { publicClient } = configureChains(chains, [
   w3mProvider({
@@ -38,7 +38,6 @@ export const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
 export function walletClientToEthers5Signer(walletClient: WalletClient) {
   const { account, chain = chains[0], transport } = walletClient;
-  console.log(chain);
   const network = {
     chainId: chain.id,
     name: chain.name,

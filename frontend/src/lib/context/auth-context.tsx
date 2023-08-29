@@ -30,7 +30,7 @@ type AuthContext = {
   showSuccessModal: boolean;
   ens: SSXEnsData | undefined;
   showSignInModal: boolean;
-  store: (key: any, value: any) => void;
+  store: (key: any, value: any) => Promise<void>;
   get: (key: string) => Promise<any>;
   syncOrbit: ({ likes, posts, user }: any) => void;
   createDataVault: () => void;
@@ -90,13 +90,11 @@ export function AuthContextProvider({
       setSSX(ssx);
       try {
         const { ens } = await ssx.signIn();
-        if (ens !== undefined) {
+        if (ens !== undefined && Object.values(ens).length > 0) {
           setEns(ens);
 
           const userHasOrbit = await ssx.storage.activateSession();
           setHasOrbit(userHasOrbit);
-        } else {
-          disconnect();
         }
       } catch (err) {
         console.error(err);
@@ -195,11 +193,9 @@ export function AuthContextProvider({
   };
 
   const signOut = async (): Promise<void> => {
-    try {
-      await signOutFirebase(auth);
-    } catch (error) {
-      setError(error as Error);
-    }
+    await disconnect();
+    setEns(undefined);
+    setUser(null);
   };
 
   const isAdmin = user ? user.username === 'ccrsxx' : false;

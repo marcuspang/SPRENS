@@ -51,12 +51,14 @@ const SIWE = () => {
           </a>
           .
         </p>
-        <Web3NetworkSwitch />
+        <div className='text-center'>
+          <Web3NetworkSwitch />
+        </div>
       </>
     );
   }
 
-  if (ens === undefined) {
+  if (ens === undefined || ens?.domain == null) {
     return (
       <>
         <h2 className='text-center'>
@@ -68,7 +70,9 @@ const SIWE = () => {
         >
           Please login to an Ethereum account with an ENS name.
         </p>
-        <Web3NetworkSwitch />
+        <div className='text-center'>
+          <Web3NetworkSwitch />
+        </div>
       </>
     );
   }
@@ -94,7 +98,9 @@ const SIWE = () => {
           You don't currently have a data vault. Sign the message to create your
           data vault. You can change your data vault at any time afterwards.
         </p>
-        <Web3NetworkSwitch />
+        <div className='text-center'>
+          <Web3NetworkSwitch />
+        </div>
       </>
     );
   }

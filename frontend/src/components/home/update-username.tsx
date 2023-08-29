@@ -14,6 +14,7 @@ import { Modal } from '@components/modal/modal';
 import { UsernameModal } from '@components/modal/username-modal';
 import { InputField } from '@components/input/input-field';
 import type { FormEvent, ChangeEvent } from 'react';
+import { useAccount } from 'wagmi';
 
 export function UpdateUsername(): JSX.Element {
   const [alreadySet, setAlreadySet] = useState(false);
@@ -22,13 +23,13 @@ export function UpdateUsername(): JSX.Element {
   const [visited, setVisited] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-
-  const { user } = useAuth();
+  const { address } = useAccount();
+  const { user, store, get } = useAuth();
   const { open, openModal, closeModal } = useModal();
 
   useEffect(() => {
     const checkAvailability = async (value: string): Promise<void> => {
-      const empty = await checkUsernameAvailability(value);
+      const empty = !(await get('/user' + address)).username;
 
       if (empty) setAvailable(true);
       else {
@@ -52,7 +53,7 @@ export function UpdateUsername(): JSX.Element {
   }, [inputValue]);
 
   useEffect(() => {
-    if (!user?.username || !user?.updatedAt) openModal();
+    if (!user?.username) openModal();
     else setAlreadySet(true);
   }, []);
 
@@ -67,7 +68,11 @@ export function UpdateUsername(): JSX.Element {
 
     await sleep(500);
 
-    await updateUsername(user?.id as string, inputValue);
+    await store('/user' + address, {
+      ...user,
+      username: inputValue,
+      updatedAt: Date.now()
+    });
 
     closeModal();
 
